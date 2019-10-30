@@ -1,0 +1,146 @@
+<html>
+
+<head>
+<title>week10_ca</title>
+</head>
+
+<body>
+
+<p>引入程序包</p>
+
+<!--begin.rcode
+library(stats)
+library(dplyr)
+library(sqldf)
+library(pastecs)
+end.rcode-->
+
+<p>读取数据表，筛选Week 10部分</p>
+
+<!--begin.rcode
+all_code=read.csv("all_code.csv", header=TRUE)
+week10_code <- all_code %>% filter(week=="Week 10")
+end.rcode-->
+
+<p>依据vert1_id(发言人身份)，对SKI、MKI、DKI、SKC、MKC、DKC进行分类汇总<br>
+SKI、MKI、DKI是衡量个人层面知识探索的浅、中、深三层级<br>
+SKC、MKC、DKC是衡量班级或小组层面知识构建的浅、中、深三层级<br>
+</p>
+
+<!--begin.rcode
+SKI_sum <- sqldf("select vert1_id, sum(SKI) as SKI_sum from week10_code group by vert1_id")
+MKI_sum <- sqldf("select vert1_id, sum(MKI) as MKI_sum from week10_code group by vert1_id")
+DKI_sum <- sqldf("select vert1_id, sum(DKI) as DKI_sum from week10_code group by vert1_id")
+SKC_sum <- sqldf("select vert1_id, sum(SKC) as SKC_sum from week10_code group by vert1_id")
+MKC_sum <- sqldf("select vert1_id, sum(MKC) as MKC_sum from week10_code group by vert1_id")
+DKC_sum <- sqldf("select vert1_id, sum(DKC) as DKC_sum from week10_code group by vert1_id")
+end.rcode-->
+
+<p>将汇总结果转换为数字向量，用vert1_id对向量命名，画出柱状图</p>
+<p>SKI</p>
+<!--begin.rcode fig.width=8, fig.height=5
+SKI_sum_v = as.numeric(SKI_sum$SKI_sum)
+names(SKI_sum_v) <- SKI_sum$vert1_id
+SKI_sum_v
+barplot(SKI_sum_v, main="SKI Bar Plot", xlab="Identity", ylab="SKI")
+end.rcode-->
+
+<p>MKI</p>
+
+<!--begin.rcode fig.width=8, fig.height=5
+MKI_sum_v = as.numeric(MKI_sum$MKI_sum)
+names(MKI_sum_v) <- MKI_sum$vert1_id
+MKI_sum_v
+barplot(MKI_sum_v, main="MKI Bar Plot", xlab="Identity", ylab="MKI")
+end.rcode-->
+
+<p>DKI</p>
+
+<!--begin.rcode fig.width=8, fig.height=5
+DKI_sum_v = as.numeric(DKI_sum$DKI_sum)
+names(DKI_sum_v) <- DKI_sum$vert1_id
+DKI_sum_v
+barplot(DKI_sum_v, main="DKI Bar Plot", xlab="Identity", ylab="DKI")
+end.rcode-->
+
+<p>SKC</p>
+
+<!--begin.rcode fig.width=8, fig.height=5
+SKC_sum_v = as.numeric(SKC_sum$SKC_sum)
+names(SKC_sum_v) <- SKC_sum$vert1_id
+SKC_sum_v
+barplot(SKC_sum_v, main="SKC Bar Plot", xlab="Identity", ylab="SKC")
+end.rcode-->
+
+<p>MKC</p>
+
+<!--begin.rcode fig.width=8, fig.height=5
+MKC_sum_v = as.numeric(MKC_sum$MKC_sum)
+names(MKC_sum_v) <- MKC_sum$vert1_id
+MKC_sum_v
+barplot(MKC_sum_v, main="MKC Bar Plot", xlab="Identity", ylab="MKC")
+end.rcode-->
+
+<p>DKC</p>
+
+<!--begin.rcode fig.width=8, fig.height=5
+DKC_sum_v = as.numeric(DKC_sum$DKC_sum)
+names(DKC_sum_v) <- DKC_sum$vert1_id
+DKC_sum_v
+barplot(DKC_sum_v, main="DKC Bar Plot", xlab="Identity", ylab="DKC")
+end.rcode-->
+
+<p>自定义分析指标<br>
+Sum_I = SKI*1+MKI*2+DKI*3<br>
+Sum_C = SKC*1+MKC*2+DKC*3<br>
+Sum_I个人层面知识探索能力指标<br>
+Sum_C小组层面知识建构能力指标<br>
+分类汇总
+</p>
+<!--begin.rcode fig.width=8, fig.height=5
+fsi_code <- all_code %>% filter(week=="Week 10")  %>%
+  select(vert1_id,vert2_id, SKI, MKI, DKI) %>% mutate(si_codes = SKI*1+MKI*2+DKI*3)%>%
+  group_by(vert1_id)%>% summarise(si_codes=sum(si_codes))
+
+fsc_code <- all_code %>% filter(week=="Week 10")  %>%
+  select(vert1_id,vert2_id, SKC, MKC, DKC) %>% mutate(sc_codes = SKC*1+MKC*2+DKC*3)%>%
+  group_by(vert1_id)%>% summarise(sc_codes=sum(sc_codes))
+end.rcode-->
+<p>Sum_I柱状图</p>
+<!--begin.rcode fig.width=8, fig.height=5
+si_codes_v = as.numeric(fsi_code$si_codes)
+names(si_codes_v) <- fsi_code$vert1_id
+si_codes_v
+barplot(si_codes_v, main="Sum_I Bar Plot", xlab="Identity", ylab="Sum_I")
+end.rcode-->
+<p>Sum_I描述性统计分析<p>
+<!--begin.rcode fig.width=8, fig.height=5
+stat.desc(fsi_code$si_codes, basic=TRUE, desc=TRUE, norm=FALSE, p=0.95)
+end.rcode-->
+<p>Sum_C柱状图</p>
+<!--begin.rcode fig.width=8, fig.height=5
+sc_codes_v = as.numeric(fsc_code$sc_codes)
+names(sc_codes_v) <- fsc_code$vert1_id
+sc_codes_v
+barplot(sc_codes_v, main="Sum_C Bar Plot", xlab="Identity", ylab="Sum_C")
+end.rcode-->
+<p>Sum_C描述性统计分析<p>
+<!--begin.rcode fig.width=8, fig.height=5
+stat.desc(fsc_code$sc_codes, basic=TRUE, desc=TRUE, norm=FALSE, p=0.95)
+end.rcode-->
+<p>Sum_I与Sum_C对比分析<p>
+<!--begin.rcode fig.width=10, fig.height=6
+plot(fsi_code$si_codes,col="red",pch=1,type="b",xlab="STUDENT",ylab="",cex=1.2,lwd=2,ylim=c(0,30))
+lines(fsc_code$sc_codes,col="blue",pch=6,type="b",xlab="STUDENT",ylab="",cex=1.2,lwd=2)
+grid(nx=6,ny=6,lwd=2)
+legend("topright",legend=c("Sum_I","Sum_C"),pch=c(1,6),col=c("red","blue"),lwd=2, cex=c(1.4,1.4))
+end.rcode-->
+
+<p>
+nbr.val         样本数量 nbr.null 空样本数量 nbr.na  数值缺失样本数量<br>
+min     最小值   max      最大值     range   范围          sum    求和<br>
+median  中位数   mean     平均数     SE.mean 标准误差      CI.mean置信区间<br>
+var     方差     std.dev  标准差     coef.var变异系数<br>
+</p>
+</body>
+</html>

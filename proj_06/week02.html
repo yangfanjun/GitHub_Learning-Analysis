@@ -1,0 +1,515 @@
+<html>
+
+<head>
+<style type="text/css">
+.inline {
+  background-color: #f7f7f7;
+  border:solid 1px #B0B0B0;
+}
+.error {
+	font-weight: bold;
+	color: #FF0000;
+}
+.warning {
+	font-weight: bold;
+}
+.message {
+	font-style: italic;
+}
+.source, .output, .warning, .error, .message {
+	padding: 0 1em;
+  border:solid 1px #F7F7F7;
+}
+.source {
+  background-color: #f5f5f5;
+}
+.left {
+  text-align: left;
+}
+.right {
+  text-align: right;
+}
+.center {
+  text-align: center;
+}
+.hl.num {
+  color: #AF0F91;
+}
+.hl.str {
+  color: #317ECC;
+}
+.hl.com {
+  color: #AD95AF;
+  font-style: italic;
+}
+.hl.opt {
+  color: #000000;
+}
+.hl.std {
+  color: #585858;
+}
+.hl.kwa {
+  color: #295F94;
+  font-weight: bold;
+}
+.hl.kwb {
+  color: #B05A65;
+}
+.hl.kwc {
+  color: #55aa55;
+}
+.hl.kwd {
+  color: #BC5A65;
+  font-weight: bold;
+}
+</style>
+<title>week02_sna</title>
+</head>
+
+<body>
+
+<p>引入stats、dplyr、igraph包<br>
+stats：包含统计计算和随机数生成的函数<br>
+dplyr：包含重要的数据操作函数<br>
+igraph：一个绘制图形的工具包<br>
+</p>
+
+<div class="chunk" id="unnamed-chunk-1"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(stats)</span>
+<span class="hl kwd">library</span><span class="hl std">(dplyr)</span>
+</pre></div>
+<div class="message"><pre class="knitr r">## 
+## Attaching package: 'dplyr'
+</pre></div>
+<div class="message"><pre class="knitr r">## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+</pre></div>
+<div class="message"><pre class="knitr r">## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(igraph)</span>
+</pre></div>
+<div class="message"><pre class="knitr r">## 
+## Attaching package: 'igraph'
+</pre></div>
+<div class="message"><pre class="knitr r">## The following objects are masked from 'package:dplyr':
+## 
+##     as_data_frame, groups, union
+</pre></div>
+<div class="message"><pre class="knitr r">## The following objects are masked from 'package:stats':
+## 
+##     decompose, spectrum
+</pre></div>
+<div class="message"><pre class="knitr r">## The following object is masked from 'package:base':
+## 
+##     union
+</pre></div>
+</div></div>
+
+<p>读取数据表</p>
+
+<div class="chunk" id="unnamed-chunk-2"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">all_code</span><span class="hl kwb">=</span><span class="hl kwd">read.csv</span><span class="hl std">(</span><span class="hl str">&quot;all_code.csv&quot;</span><span class="hl std">,</span> <span class="hl kwc">header</span><span class="hl std">=</span><span class="hl num">TRUE</span><span class="hl std">)</span>
+</pre></div>
+</div></div>
+
+<p>筛选Week 02部分，选取vert1_id和vert2_id两列，存入week02_code，每行代表vert1_id向vert2_id回复一次</p>
+
+<div class="chunk" id="unnamed-chunk-3"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">week02_code</span> <span class="hl kwb">&lt;-</span> <span class="hl std">all_code</span> <span class="hl opt">%&gt;%</span> <span class="hl kwd">filter</span><span class="hl std">(week</span><span class="hl opt">==</span><span class="hl str">&quot;Week 02&quot;</span><span class="hl std">)</span> <span class="hl opt">%&gt;%</span> <span class="hl kwd">select</span><span class="hl std">(vert1_id,vert2_id)</span>
+</pre></div>
+</div></div>
+
+<p>将week02_code转化为igraph的数据格式，这是一张有向图</p>
+
+<div class="chunk" id="unnamed-chunk-4"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">all_igraph</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">graph_from_data_frame</span><span class="hl std">(</span><span class="hl kwc">d</span><span class="hl std">=week02_code,</span> <span class="hl kwc">directed</span><span class="hl std">=T)</span>
+</pre></div>
+</div></div>
+
+<p>获得图中每条边的情况和节点名称</p>
+
+<div class="chunk" id="unnamed-chunk-5"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">E</span><span class="hl std">(all_igraph)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## + 80/80 edges from eeb234a (vertex names):
+##  [1] A-&gt;ins B-&gt;A   R-&gt;A   A-&gt;R   C-&gt;A   D-&gt;A   R-&gt;ins B-&gt;R   E-&gt;R   R-&gt;E  
+## [11] F-&gt;R   R-&gt;F   D-&gt;R   S-&gt;R   B-&gt;ins R-&gt;B   C-&gt;B   F-&gt;B   A-&gt;B   G-&gt;B  
+## [21] B-&gt;G   R-&gt;B   H-&gt;B   E-&gt;ins C-&gt;E   B-&gt;E   I-&gt;ins J-&gt;I   I-&gt;J   B-&gt;I  
+## [31] H-&gt;I   I-&gt;H   K-&gt;ins L-&gt;K   I-&gt;K   H-&gt;ins M-&gt;H   C-&gt;ins H-&gt;C   G-&gt;ins
+## [41] B-&gt;G   E-&gt;G   G-&gt;E   F-&gt;G   J-&gt;ins L-&gt;J   L-&gt;ins A-&gt;L   J-&gt;L   N-&gt;ins
+## [51] E-&gt;N   F-&gt;ins M-&gt;F   F-&gt;M   G-&gt;M   O-&gt;ins F-&gt;O   F-&gt;ins G-&gt;F   C-&gt;F  
+## [61] F-&gt;C   M-&gt;ins R-&gt;M   O-&gt;M   R-&gt;O   F-&gt;M   O-&gt;ins G-&gt;O   F-&gt;O   P-&gt;ins
+## [71] I-&gt;P   S-&gt;ins F-&gt;S   R-&gt;ins S-&gt;ins F-&gt;S   O-&gt;S   C-&gt;S   F-&gt;S   Q-&gt;ins
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">V</span><span class="hl std">(all_igraph)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## + 20/20 vertices, named, from eeb234a:
+##  [1] A   B   R   C   D   E   F   S   G   H   I   J   K   L   M   N   O  
+## [18] P   Q   ins
+</pre></div>
+</div></div>
+
+<p><b>节点层面分析</b><br>
+计算每个节点的入度，并画出柱状图
+</p>
+
+<div class="chunk" id="unnamed-chunk-6"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">igraph</span><span class="hl opt">::</span><span class="hl kwd">degree</span><span class="hl std">(all_igraph)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##   A   B   R   C   D   E   F   S   G   H   I   J   K   L   M   N   O   P 
+##   8  14  15   8   2   8  17   8  10   6   8   5   3   5   8   2   8   2 
+##   Q ins 
+##   1  22
+</pre></div>
+</div></div>
+<div class="chunk" id="unnamed-chunk-7"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">indegree_v</span> <span class="hl kwb">&lt;-</span> <span class="hl std">igraph</span><span class="hl opt">::</span><span class="hl kwd">degree</span><span class="hl std">(all_igraph)</span>
+<span class="hl kwd">barplot</span><span class="hl std">(indegree_v,</span> <span class="hl kwc">main</span><span class="hl std">=</span><span class="hl str">&quot;Indegree Bar Plot&quot;</span><span class="hl std">,</span> <span class="hl kwc">xlab</span><span class="hl std">=</span><span class="hl str">&quot;Identity&quot;</span><span class="hl std">,</span> <span class="hl kwc">ylab</span><span class="hl std">=</span><span class="hl str">&quot;Indegree&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-7-1.png" title="plot of chunk unnamed-chunk-7" alt="plot of chunk unnamed-chunk-7" class="plot" /></div></div>
+
+
+<p>计算每个节点的出度，并画出柱状图</p>
+
+<div class="chunk" id="unnamed-chunk-8"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">igraph</span><span class="hl opt">::</span><span class="hl kwd">degree</span><span class="hl std">(all_igraph,</span><span class="hl kwc">mode</span><span class="hl std">=</span><span class="hl str">&quot;out&quot;</span><span class="hl std">)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##   A   B   R   C   D   E   F   S   G   H   I   J   K   L   M   N   O   P 
+##   4   7   9   6   2   4  13   3   6   4   5   3   1   3   3   1   4   1 
+##   Q ins 
+##   1   0
+</pre></div>
+</div></div>
+<div class="chunk" id="unnamed-chunk-9"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">outdegree_v</span> <span class="hl kwb">&lt;-</span> <span class="hl std">igraph</span><span class="hl opt">::</span><span class="hl kwd">degree</span><span class="hl std">(all_igraph,</span><span class="hl kwc">mode</span><span class="hl std">=</span><span class="hl str">&quot;out&quot;</span><span class="hl std">)</span>
+<span class="hl kwd">barplot</span><span class="hl std">(outdegree_v,</span> <span class="hl kwc">main</span><span class="hl std">=</span><span class="hl str">&quot;Outdegree Bar Plot&quot;</span><span class="hl std">,</span> <span class="hl kwc">xlab</span><span class="hl std">=</span><span class="hl str">&quot;Identity&quot;</span><span class="hl std">,</span> <span class="hl kwc">ylab</span><span class="hl std">=</span><span class="hl str">&quot;Outdegree&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-9-1.png" title="plot of chunk unnamed-chunk-9" alt="plot of chunk unnamed-chunk-9" class="plot" /></div></div>
+
+<p>中介中心性(Betweenness)这个度量很有意思，这个有点像是我们身边那种社交达人，我们认识的不少朋友可能都是通过他/她认识的，这个人起到了中介的作用。中介中心性指的是一个结点担任其它两个结点之间最短路的桥梁的次数。</p>
+
+<div class="chunk" id="unnamed-chunk-10"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">igraph</span><span class="hl opt">::</span><span class="hl kwd">betweenness</span><span class="hl std">(all_igraph)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##         A         B         R         C         D         E         F 
+## 17.116667 54.816667 50.966667 20.100000  0.000000 15.241667 27.541667 
+##         S         G         H         I         J         K         L 
+##  5.700000 11.700000 44.566667 58.250000 15.500000  0.000000  7.333333 
+##         M         N         O         P         Q       ins 
+## 15.666667  0.000000  1.500000  0.000000  0.000000  0.000000
+</pre></div>
+</div></div>
+<div class="chunk" id="unnamed-chunk-11"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">betweenness_v</span> <span class="hl kwb">&lt;-</span> <span class="hl std">igraph</span><span class="hl opt">::</span><span class="hl kwd">betweenness</span><span class="hl std">(all_igraph)</span>
+<span class="hl kwd">barplot</span><span class="hl std">(betweenness_v,</span> <span class="hl kwc">main</span><span class="hl std">=</span><span class="hl str">&quot;Betweenness Bar Plot&quot;</span><span class="hl std">,</span> <span class="hl kwc">xlab</span><span class="hl std">=</span><span class="hl str">&quot;Identity&quot;</span><span class="hl std">,</span> <span class="hl kwc">ylab</span><span class="hl std">=</span><span class="hl str">&quot;Betweenness&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-11-1.png" title="plot of chunk unnamed-chunk-11" alt="plot of chunk unnamed-chunk-11" class="plot" /></div></div>
+
+<p>特征向量中心性(Eigenvector Centrality)。一个节点的重要性既取决于其邻居节点的数量(即该节点的度)，也取决于其邻居节点的重要性。
+</p>
+
+<div class="chunk" id="unnamed-chunk-12"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">igraph</span><span class="hl opt">::</span><span class="hl kwd">eigen_centrality</span><span class="hl std">(all_igraph)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## $vector
+##          A          B          R          C          D          E 
+## 0.44350993 0.78536093 0.87608213 0.48823745 0.11612980 0.47566078 
+##          F          S          G          H          I          J 
+## 1.00000000 0.60260968 0.65102769 0.28918728 0.25113123 0.15624993 
+##          K          L          M          N          O          P 
+## 0.11999531 0.16083292 0.55864497 0.12560089 0.58007769 0.10584132 
+##          Q        ins 
+## 0.08374068 0.95155200 
+## 
+## $value
+## [1] 11.36308
+## 
+## $options
+## $options$bmat
+## [1] &quot;I&quot;
+## 
+## $options$n
+## [1] 20
+## 
+## $options$which
+## [1] &quot;LA&quot;
+## 
+## $options$nev
+## [1] 1
+## 
+## $options$tol
+## [1] 0
+## 
+## $options$ncv
+## [1] 0
+## 
+## $options$ldv
+## [1] 0
+## 
+## $options$ishift
+## [1] 1
+## 
+## $options$maxiter
+## [1] 1000
+## 
+## $options$nb
+## [1] 1
+## 
+## $options$mode
+## [1] 1
+## 
+## $options$start
+## [1] 1
+## 
+## $options$sigma
+## [1] 0
+## 
+## $options$sigmai
+## [1] 0
+## 
+## $options$info
+## [1] 0
+## 
+## $options$iter
+## [1] 3
+## 
+## $options$nconv
+## [1] 1
+## 
+## $options$numop
+## [1] 20
+## 
+## $options$numopb
+## [1] 0
+## 
+## $options$numreo
+## [1] 13
+</pre></div>
+</div></div>
+<div class="chunk" id="unnamed-chunk-13"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">eigen_centrality_v</span> <span class="hl kwb">&lt;-</span> <span class="hl std">igraph</span><span class="hl opt">::</span><span class="hl kwd">eigen_centrality</span><span class="hl std">(all_igraph)</span>
+<span class="hl kwd">barplot</span><span class="hl std">(eigen_centrality_v</span><span class="hl opt">$</span><span class="hl std">vector,</span> <span class="hl kwc">main</span><span class="hl std">=</span><span class="hl str">&quot;Eigenvector Centrality Bar Plot&quot;</span><span class="hl std">,</span>
+        <span class="hl kwc">xlab</span><span class="hl std">=</span><span class="hl str">&quot;Identity&quot;</span><span class="hl std">,</span> <span class="hl kwc">ylab</span><span class="hl std">=</span><span class="hl str">&quot;Eigenvector Centrality&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-13-1.png" title="plot of chunk unnamed-chunk-13" alt="plot of chunk unnamed-chunk-13" class="plot" /></div></div>
+
+<p><b>网络层面分析</b><br>
+图的直径是最长线的长度，直径采用宽度优先搜索法计算</p>
+
+<div class="chunk" id="unnamed-chunk-14"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">igraph</span><span class="hl opt">::</span><span class="hl kwd">diameter</span><span class="hl std">(all_igraph,</span> <span class="hl kwc">directed</span> <span class="hl std">=</span> <span class="hl num">TRUE</span><span class="hl std">)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## [1] 6
+</pre></div>
+</div></div>
+
+<p>在有向图中对节点两两之间的关系进行分类，可以分为三种状态：相互的、不对称的或不存在的，13+54+123=190=c20/2</p>
+
+<div class="chunk" id="unnamed-chunk-15"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">dyad_census</span><span class="hl std">(all_igraph)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## $mut
+## [1] 13
+## 
+## $asym
+## [1] 54
+## 
+## $null
+## [1] 123
+</pre></div>
+</div></div>
+
+<p>节点两两之间最短距离，返回一个矩阵</p>
+
+<div class="chunk" id="unnamed-chunk-16"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">distances</span><span class="hl std">(all_igraph)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##     A B R C D E F S G H I J K L M N O P Q ins
+## A   0 1 1 1 1 2 2 2 2 2 2 2 2 1 2 2 2 2 2   1
+## B   1 0 1 1 2 1 1 2 1 1 1 2 2 2 2 2 2 2 2   1
+## R   1 1 0 2 1 1 1 1 2 2 2 2 2 2 1 2 1 2 2   1
+## C   1 1 2 0 2 1 1 1 2 1 2 2 2 2 2 2 2 2 2   1
+## D   1 2 1 2 0 2 2 2 3 3 3 3 3 2 2 3 2 3 3   2
+## E   2 1 1 1 2 0 2 2 1 2 2 2 2 2 2 1 2 2 2   1
+## F   2 1 1 1 2 2 0 1 1 2 2 2 2 2 1 2 1 2 2   1
+## S   2 2 1 1 2 2 1 0 2 2 2 2 2 2 2 2 1 2 2   1
+## G   2 1 2 2 3 1 1 2 0 2 2 2 2 2 1 2 1 2 2   1
+## H   2 1 2 1 3 2 2 2 2 0 1 2 2 2 1 2 2 2 2   1
+## I   2 1 2 2 3 2 2 2 2 1 0 1 1 2 2 2 2 1 2   1
+## J   2 2 2 2 3 2 2 2 2 2 1 0 2 1 2 2 2 2 2   1
+## K   2 2 2 2 3 2 2 2 2 2 1 2 0 1 2 2 2 2 2   1
+## L   1 2 2 2 2 2 2 2 2 2 2 1 1 0 2 2 2 2 2   1
+## M   2 2 1 2 2 2 1 2 1 1 2 2 2 2 0 2 1 2 2   1
+## N   2 2 2 2 3 1 2 2 2 2 2 2 2 2 2 0 2 2 2   1
+## O   2 2 1 2 2 2 1 1 1 2 2 2 2 2 1 2 0 2 2   1
+## P   2 2 2 2 3 2 2 2 2 2 1 2 2 2 2 2 2 0 2   1
+## Q   2 2 2 2 3 2 2 2 2 2 2 2 2 2 2 2 2 2 0   1
+## ins 1 1 1 1 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1   0
+</pre></div>
+</div></div>
+
+<p>中心化：以顶点的中心度进行图中心化度量的一种方法</p>
+
+<div class="chunk" id="unnamed-chunk-17"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">centr_degree</span><span class="hl std">(all_igraph)</span><span class="hl opt">$</span><span class="hl std">centralization</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## [1] 0.3878116
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">centr_clo</span><span class="hl std">(all_igraph,</span> <span class="hl kwc">mode</span><span class="hl std">=</span><span class="hl str">&quot;all&quot;</span><span class="hl std">)</span><span class="hl opt">$</span><span class="hl std">centralization</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## [1] 0.785341
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">centr_eigen</span><span class="hl std">(all_igraph,</span> <span class="hl kwc">directed</span><span class="hl std">=</span><span class="hl num">FALSE</span><span class="hl std">)</span><span class="hl opt">$</span><span class="hl std">centralization</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## [1] 0.6210293
+</pre></div>
+</div></div>
+
+<p>使用<b>visNetwork</b>进行可视化绘图</p>
+
+<div class="chunk" id="unnamed-chunk-18"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(visNetwork)</span>
+</pre></div>
+</div></div>
+
+<p>vert1_id和vert2_id单独成列，命名为nodes_v1和nodes_v2</p>
+
+<div class="chunk" id="unnamed-chunk-19"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">nodes_v1</span> <span class="hl kwb">&lt;-</span> <span class="hl std">all_code</span> <span class="hl opt">%&gt;%</span> <span class="hl kwd">filter</span><span class="hl std">(week</span><span class="hl opt">==</span><span class="hl str">&quot;Week 02&quot;</span><span class="hl std">)</span> <span class="hl opt">%&gt;%</span> <span class="hl kwd">select</span><span class="hl std">(vert1_id)</span>
+<span class="hl std">nodes_v2</span> <span class="hl kwb">&lt;-</span> <span class="hl std">all_code</span> <span class="hl opt">%&gt;%</span> <span class="hl kwd">filter</span><span class="hl std">(week</span><span class="hl opt">==</span><span class="hl str">&quot;Week 02&quot;</span><span class="hl std">)</span> <span class="hl opt">%&gt;%</span> <span class="hl kwd">select</span><span class="hl std">(vert2_id)</span>
+</pre></div>
+</div></div>
+
+<p>分别取出nodes_v1和nodes_v2中不重复元素，再取并集，组成字符串向量，放入unique_nodes中</p>
+
+<div class="chunk" id="unnamed-chunk-20"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">unique_nodes_v1</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">as.character</span><span class="hl std">(</span><span class="hl kwd">unique</span><span class="hl std">(nodes_v1</span><span class="hl opt">$</span><span class="hl std">vert1_id))</span>
+<span class="hl std">unique_nodes_v2</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">as.character</span><span class="hl std">(</span><span class="hl kwd">unique</span><span class="hl std">(nodes_v2</span><span class="hl opt">$</span><span class="hl std">vert2_id))</span>
+<span class="hl std">unique_nodes</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">union</span><span class="hl std">(unique_nodes_v1, unique_nodes_v2)</span>
+<span class="hl std">unique_nodes_v1</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##  [1] &quot;A&quot; &quot;B&quot; &quot;R&quot; &quot;C&quot; &quot;D&quot; &quot;E&quot; &quot;F&quot; &quot;S&quot; &quot;G&quot; &quot;H&quot; &quot;I&quot; &quot;J&quot; &quot;K&quot; &quot;L&quot; &quot;M&quot; &quot;N&quot; &quot;O&quot;
+## [18] &quot;P&quot; &quot;Q&quot;
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl std">unique_nodes_v2</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##  [1] &quot;ins&quot; &quot;A&quot;   &quot;R&quot;   &quot;E&quot;   &quot;F&quot;   &quot;B&quot;   &quot;G&quot;   &quot;I&quot;   &quot;J&quot;   &quot;H&quot;   &quot;K&quot;  
+## [12] &quot;C&quot;   &quot;L&quot;   &quot;N&quot;   &quot;M&quot;   &quot;O&quot;   &quot;P&quot;   &quot;S&quot;
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl std">unique_nodes</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##  [1] &quot;A&quot;   &quot;B&quot;   &quot;R&quot;   &quot;C&quot;   &quot;D&quot;   &quot;E&quot;   &quot;F&quot;   &quot;S&quot;   &quot;G&quot;   &quot;H&quot;   &quot;I&quot;  
+## [12] &quot;J&quot;   &quot;K&quot;   &quot;L&quot;   &quot;M&quot;   &quot;N&quot;   &quot;O&quot;   &quot;P&quot;   &quot;Q&quot;   &quot;ins&quot;
+</pre></div>
+</div></div>
+
+<p>设index为unique_nodes中每个元素的数字索引，将数字索引和节点放入一张数据表，一一对应，生成索引对照表</p>
+
+<div class="chunk" id="unnamed-chunk-21"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">index</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">seq</span><span class="hl std">(</span><span class="hl num">1</span><span class="hl std">,</span><span class="hl kwd">length</span><span class="hl std">(unique_nodes))</span>
+<span class="hl std">unique_char_num</span> <span class="hl kwb">=</span> <span class="hl kwd">data.frame</span><span class="hl std">(unique_nodes, index)</span>
+<span class="hl std">unique_char_num</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##    unique_nodes index
+## 1             A     1
+## 2             B     2
+## 3             R     3
+## 4             C     4
+## 5             D     5
+## 6             E     6
+## 7             F     7
+## 8             S     8
+## 9             G     9
+## 10            H    10
+## 11            I    11
+## 12            J    12
+## 13            K    13
+## 14            L    14
+## 15            M    15
+## 16            N    16
+## 17            O    17
+## 18            P    18
+## 19            Q    19
+## 20          ins    20
+</pre></div>
+</div></div>
+
+<p>将nodes_v1和nodes_v2转化为字符串向量</p>
+
+<div class="chunk" id="unnamed-chunk-22"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">nodes_v1_c</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">as.character</span><span class="hl std">(nodes_v1</span><span class="hl opt">$</span><span class="hl std">vert1_id)</span>
+<span class="hl std">nodes_v2_c</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">as.character</span><span class="hl std">(nodes_v2</span><span class="hl opt">$</span><span class="hl std">vert2_id)</span>
+</pre></div>
+</div></div>
+
+<p>准备两个空向量，用于存放结果</p>
+
+<div class="chunk" id="unnamed-chunk-23"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">nodes_v1_n</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">c</span><span class="hl std">()</span>
+<span class="hl std">nodes_v2_n</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">c</span><span class="hl std">()</span>
+</pre></div>
+</div></div>
+
+<p>依据索引对照表，将字符串向量转化为数字向量</p>
+
+<div class="chunk" id="unnamed-chunk-24"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwa">for</span> <span class="hl std">(i</span> <span class="hl kwa">in</span> <span class="hl std">nodes_v1_c) nodes_v1_n</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">append</span><span class="hl std">(nodes_v1_n,</span>
+    <span class="hl std">(unique_char_num[</span><span class="hl kwd">which</span><span class="hl std">(unique_char_num</span><span class="hl opt">$</span><span class="hl std">unique_nodes</span><span class="hl opt">==</span><span class="hl std">i),</span> <span class="hl str">&quot;index&quot;</span><span class="hl std">]))</span>
+<span class="hl kwa">for</span> <span class="hl std">(i</span> <span class="hl kwa">in</span> <span class="hl std">nodes_v2_c) nodes_v2_n</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">append</span><span class="hl std">(nodes_v2_n,</span>
+    <span class="hl std">(unique_char_num[</span><span class="hl kwd">which</span><span class="hl std">(unique_char_num</span><span class="hl opt">$</span><span class="hl std">unique_nodes</span><span class="hl opt">==</span><span class="hl std">i),</span> <span class="hl str">&quot;index&quot;</span><span class="hl std">]))</span>
+<span class="hl std">nodes_v1_c</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##  [1] &quot;A&quot; &quot;B&quot; &quot;R&quot; &quot;A&quot; &quot;C&quot; &quot;D&quot; &quot;R&quot; &quot;B&quot; &quot;E&quot; &quot;R&quot; &quot;F&quot; &quot;R&quot; &quot;D&quot; &quot;S&quot; &quot;B&quot; &quot;R&quot; &quot;C&quot;
+## [18] &quot;F&quot; &quot;A&quot; &quot;G&quot; &quot;B&quot; &quot;R&quot; &quot;H&quot; &quot;E&quot; &quot;C&quot; &quot;B&quot; &quot;I&quot; &quot;J&quot; &quot;I&quot; &quot;B&quot; &quot;H&quot; &quot;I&quot; &quot;K&quot; &quot;L&quot;
+## [35] &quot;I&quot; &quot;H&quot; &quot;M&quot; &quot;C&quot; &quot;H&quot; &quot;G&quot; &quot;B&quot; &quot;E&quot; &quot;G&quot; &quot;F&quot; &quot;J&quot; &quot;L&quot; &quot;L&quot; &quot;A&quot; &quot;J&quot; &quot;N&quot; &quot;E&quot;
+## [52] &quot;F&quot; &quot;M&quot; &quot;F&quot; &quot;G&quot; &quot;O&quot; &quot;F&quot; &quot;F&quot; &quot;G&quot; &quot;C&quot; &quot;F&quot; &quot;M&quot; &quot;R&quot; &quot;O&quot; &quot;R&quot; &quot;F&quot; &quot;O&quot; &quot;G&quot;
+## [69] &quot;F&quot; &quot;P&quot; &quot;I&quot; &quot;S&quot; &quot;F&quot; &quot;R&quot; &quot;S&quot; &quot;F&quot; &quot;O&quot; &quot;C&quot; &quot;F&quot; &quot;Q&quot;
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl std">nodes_v1_n</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##  [1]  1  2  3  1  4  5  3  2  6  3  7  3  5  8  2  3  4  7  1  9  2  3 10
+## [24]  6  4  2 11 12 11  2 10 11 13 14 11 10 15  4 10  9  2  6  9  7 12 14
+## [47] 14  1 12 16  6  7 15  7  9 17  7  7  9  4  7 15  3 17  3  7 17  9  7
+## [70] 18 11  8  7  3  8  7 17  4  7 19
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl std">nodes_v2_c</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##  [1] &quot;ins&quot; &quot;A&quot;   &quot;A&quot;   &quot;R&quot;   &quot;A&quot;   &quot;A&quot;   &quot;ins&quot; &quot;R&quot;   &quot;R&quot;   &quot;E&quot;   &quot;R&quot;  
+## [12] &quot;F&quot;   &quot;R&quot;   &quot;R&quot;   &quot;ins&quot; &quot;B&quot;   &quot;B&quot;   &quot;B&quot;   &quot;B&quot;   &quot;B&quot;   &quot;G&quot;   &quot;B&quot;  
+## [23] &quot;B&quot;   &quot;ins&quot; &quot;E&quot;   &quot;E&quot;   &quot;ins&quot; &quot;I&quot;   &quot;J&quot;   &quot;I&quot;   &quot;I&quot;   &quot;H&quot;   &quot;ins&quot;
+## [34] &quot;K&quot;   &quot;K&quot;   &quot;ins&quot; &quot;H&quot;   &quot;ins&quot; &quot;C&quot;   &quot;ins&quot; &quot;G&quot;   &quot;G&quot;   &quot;E&quot;   &quot;G&quot;  
+## [45] &quot;ins&quot; &quot;J&quot;   &quot;ins&quot; &quot;L&quot;   &quot;L&quot;   &quot;ins&quot; &quot;N&quot;   &quot;ins&quot; &quot;F&quot;   &quot;M&quot;   &quot;M&quot;  
+## [56] &quot;ins&quot; &quot;O&quot;   &quot;ins&quot; &quot;F&quot;   &quot;F&quot;   &quot;C&quot;   &quot;ins&quot; &quot;M&quot;   &quot;M&quot;   &quot;O&quot;   &quot;M&quot;  
+## [67] &quot;ins&quot; &quot;O&quot;   &quot;O&quot;   &quot;ins&quot; &quot;P&quot;   &quot;ins&quot; &quot;S&quot;   &quot;ins&quot; &quot;ins&quot; &quot;S&quot;   &quot;S&quot;  
+## [78] &quot;S&quot;   &quot;S&quot;   &quot;ins&quot;
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl std">nodes_v2_n</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##  [1] 20  1  1  3  1  1 20  3  3  6  3  7  3  3 20  2  2  2  2  2  9  2  2
+## [24] 20  6  6 20 11 12 11 11 10 20 13 13 20 10 20  4 20  9  9  6  9 20 12
+## [47] 20 14 14 20 16 20  7 15 15 20 17 20  7  7  4 20 15 15 17 15 20 17 17
+## [70] 20 18 20  8 20 20  8  8  8  8 20
+</pre></div>
+</div></div>
+
+<p>依据特征向量中心性赋予节点不同的颜色，中心性越高，节点越发紫</p>
+
+<div class="chunk" id="unnamed-chunk-25"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">colorchange</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">c</span><span class="hl std">()</span>
+<span class="hl kwa">for</span> <span class="hl std">(i</span> <span class="hl kwa">in</span> <span class="hl std">eigen_centrality_v</span><span class="hl opt">$</span><span class="hl std">vector){</span>
+  <span class="hl com"># 将%%替换为计算后的数值，数值最终转化为字符串形式</span>
+  <span class="hl std">color_str</span> <span class="hl kwb">&lt;-</span> <span class="hl str">&quot;rgba(151,%%,252,1)&quot;</span>
+  <span class="hl std">colorchange</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">append</span><span class="hl std">(colorchange,</span> <span class="hl kwd">gsub</span><span class="hl std">(</span><span class="hl str">&quot;%%&quot;</span><span class="hl std">,</span> <span class="hl kwd">as.character</span><span class="hl std">(</span><span class="hl num">194</span><span class="hl opt">-</span><span class="hl kwd">round</span><span class="hl std">(</span><span class="hl num">120</span><span class="hl opt">*</span><span class="hl std">i</span><span class="hl opt">^</span><span class="hl num">2</span><span class="hl std">)), color_str))}</span>
+<span class="hl std">colorchange</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##  [1] &quot;rgba(151,170,252,1)&quot; &quot;rgba(151,120,252,1)&quot; &quot;rgba(151,102,252,1)&quot;
+##  [4] &quot;rgba(151,165,252,1)&quot; &quot;rgba(151,192,252,1)&quot; &quot;rgba(151,167,252,1)&quot;
+##  [7] &quot;rgba(151,74,252,1)&quot;  &quot;rgba(151,150,252,1)&quot; &quot;rgba(151,143,252,1)&quot;
+## [10] &quot;rgba(151,184,252,1)&quot; &quot;rgba(151,186,252,1)&quot; &quot;rgba(151,191,252,1)&quot;
+## [13] &quot;rgba(151,192,252,1)&quot; &quot;rgba(151,191,252,1)&quot; &quot;rgba(151,157,252,1)&quot;
+## [16] &quot;rgba(151,192,252,1)&quot; &quot;rgba(151,154,252,1)&quot; &quot;rgba(151,193,252,1)&quot;
+## [19] &quot;rgba(151,193,252,1)&quot; &quot;rgba(151,85,252,1)&quot;
+</pre></div>
+</div></div>
+
+<p>设置visNetwork节点属性，节点大小为2*(入度+出度)^0.8</p>
+
+<div class="chunk" id="unnamed-chunk-26"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">nodes</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">data.frame</span><span class="hl std">(</span><span class="hl kwc">id</span><span class="hl std">=unique_char_num</span><span class="hl opt">$</span><span class="hl std">index,</span> <span class="hl kwc">label</span><span class="hl std">=unique_char_num</span><span class="hl opt">$</span><span class="hl std">unique_nodes,</span>
+                    <span class="hl kwc">size</span> <span class="hl std">=</span> <span class="hl num">2</span><span class="hl opt">*</span><span class="hl std">(indegree_v</span><span class="hl opt">+</span><span class="hl std">outdegree_v)</span><span class="hl opt">^</span><span class="hl num">0.8</span><span class="hl std">,</span> <span class="hl kwc">color.background</span><span class="hl std">=colorchange)</span>
+</pre></div>
+</div></div>
+
+<p>设置visNetwork边属性，边是有向的</p>
+
+<div class="chunk" id="unnamed-chunk-27"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">edges</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">data.frame</span><span class="hl std">(</span><span class="hl kwc">from</span> <span class="hl std">= nodes_v1_n,</span> <span class="hl kwc">to</span> <span class="hl std">= nodes_v2_n)</span>
+</pre></div>
+</div></div>
+
+<p>visNetwork画图，节点标签字体大小30px，箭头大小0.8</p>
+
+<div class="chunk" id="unnamed-chunk-28"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">visNetwork</span><span class="hl std">(nodes, edges,</span> <span class="hl kwc">height</span> <span class="hl std">=</span> <span class="hl str">&quot;500px&quot;</span><span class="hl std">,</span> <span class="hl kwc">width</span> <span class="hl std">=</span> <span class="hl str">&quot;100%&quot;</span><span class="hl std">)</span> <span class="hl opt">%&gt;%</span>
+  <span class="hl kwd">visNodes</span><span class="hl std">(</span><span class="hl kwc">font</span><span class="hl std">=</span><span class="hl str">&quot;30px&quot;</span><span class="hl std">)</span> <span class="hl opt">%&gt;%</span>
+  <span class="hl kwd">visEdges</span><span class="hl std">(</span><span class="hl kwc">arrows</span> <span class="hl std">=</span><span class="hl kwd">list</span><span class="hl std">(</span><span class="hl kwc">to</span> <span class="hl std">=</span> <span class="hl kwd">list</span><span class="hl std">(</span><span class="hl kwc">enabled</span> <span class="hl std">=</span> <span class="hl num">TRUE</span><span class="hl std">,</span> <span class="hl kwc">scaleFactor</span> <span class="hl std">=</span> <span class="hl num">0.8</span><span class="hl std">)))</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-28-1.png" title="plot of chunk unnamed-chunk-28" alt="plot of chunk unnamed-chunk-28" class="plot" /></div></div>
+
+</body>
+</html>

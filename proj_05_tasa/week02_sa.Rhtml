@@ -1,0 +1,78 @@
+<html>
+
+<head>
+<title>week02_sa</title>
+</head>
+
+<body>
+
+<p>引入devtools、LagSeq、dplyr包</p>
+
+<!--begin.rcode
+library(devtools)
+library(LagSeq)
+library(dplyr)
+end.rcode-->
+
+<p>读取数据表<br>
+筛选Week 02部分，选取participatory_role一列，存入week02_code，每行代表该角色向vert2回复，数据表本身已按事件发生先后排序</p>
+
+<!--begin.rcode
+all_code=read.csv("all_code.csv", header=TRUE)
+week02_code <- all_code %>% filter(week=="Week 02") %>% select(participatory_role)
+end.rcode-->
+
+<p>将participatory_role转化为字符串向量role_v<br>
+取出role_v中不重复元素
+</p>
+
+<!--begin.rcode
+role_v<-as.vector(week02_code$participatory_role)
+as.character(unique(role_v))
+end.rcode-->
+
+<p>用数字1-6对6类角色进行编码</p>
+
+<!--begin.rcode
+role_case<- case_when(role_v == "Starter" ~ 1,
+                   role_v == "Leader" ~ 2,
+                   role_v == "Influencer" ~ 3,
+                   role_v == "Peripheral" ~ 4,
+                   role_v == "Mediator" ~ 5,
+                   role_v == "Regular" ~ 6)
+end.rcode-->
+
+<p>使用LagSeq(滞后序列分析包)计算出过渡频率，Yule q值和z值<br>
+过渡频率$freq，表示一类角色回复之后紧跟另一类角色的频率
+</p>
+
+<!--begin.rcode
+as.matrix(LagSeq(role_case)$freq)
+end.rcode-->
+
+<p>Yule q 值，即标准化度量，表示两个编码类别之间的关联强度，范围从-1到+1, 0表示没有关联</p>
+
+<!--begin.rcode
+as.matrix(LagSeq(role_case)$yulesq)
+yulesq=as.matrix(LagSeq(role_case)$yulesq)
+yulesq[yulesq<0]<-0
+as.matrix(yulesq)
+end.rcode-->
+
+<p>z值表示特定过渡的统计显著性(z值大于1.96表示过渡序列达到了统计显著性即p < .05)</p>
+
+<!--begin.rcode
+as.matrix(LagSeq(role_case)$adjres)
+adjres=as.matrix(LagSeq(role_case)$adjres)  #z 值
+adjres[adjres<1.96]<-0
+as.matrix(adjres)
+end.rcode-->
+
+
+
+<!--begin.rcode fig.width=7, fig.height=6
+plot(cars)
+end.rcode-->
+
+</body>
+</html>

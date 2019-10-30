@@ -1,0 +1,280 @@
+<html>
+
+<head>
+<style type="text/css">
+.inline {
+  background-color: #f7f7f7;
+  border:solid 1px #B0B0B0;
+}
+.error {
+	font-weight: bold;
+	color: #FF0000;
+}
+.warning {
+	font-weight: bold;
+}
+.message {
+	font-style: italic;
+}
+.source, .output, .warning, .error, .message {
+	padding: 0 1em;
+  border:solid 1px #F7F7F7;
+}
+.source {
+  background-color: #f5f5f5;
+}
+.left {
+  text-align: left;
+}
+.right {
+  text-align: right;
+}
+.center {
+  text-align: center;
+}
+.hl.num {
+  color: #AF0F91;
+}
+.hl.str {
+  color: #317ECC;
+}
+.hl.com {
+  color: #AD95AF;
+  font-style: italic;
+}
+.hl.opt {
+  color: #000000;
+}
+.hl.std {
+  color: #585858;
+}
+.hl.kwa {
+  color: #295F94;
+  font-weight: bold;
+}
+.hl.kwb {
+  color: #B05A65;
+}
+.hl.kwc {
+  color: #55aa55;
+}
+.hl.kwd {
+  color: #BC5A65;
+  font-weight: bold;
+}
+</style>
+<title>week08_ca</title>
+</head>
+
+<body>
+
+<p>引入程序包</p>
+
+<div class="chunk" id="unnamed-chunk-1"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(stats)</span>
+<span class="hl kwd">library</span><span class="hl std">(dplyr)</span>
+</pre></div>
+<div class="message"><pre class="knitr r">## 
+## Attaching package: 'dplyr'
+</pre></div>
+<div class="message"><pre class="knitr r">## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+</pre></div>
+<div class="message"><pre class="knitr r">## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(sqldf)</span>
+</pre></div>
+<div class="message"><pre class="knitr r">## Loading required package: gsubfn
+</pre></div>
+<div class="message"><pre class="knitr r">## Loading required package: proto
+</pre></div>
+<div class="message"><pre class="knitr r">## Loading required package: RSQLite
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(pastecs)</span>
+</pre></div>
+<div class="message"><pre class="knitr r">## 
+## Attaching package: 'pastecs'
+</pre></div>
+<div class="message"><pre class="knitr r">## The following objects are masked from 'package:dplyr':
+## 
+##     first, last
+</pre></div>
+</div></div>
+
+<p>读取数据表，筛选Week 08部分</p>
+
+<div class="chunk" id="unnamed-chunk-2"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">all_code</span><span class="hl kwb">=</span><span class="hl kwd">read.csv</span><span class="hl std">(</span><span class="hl str">&quot;all_code.csv&quot;</span><span class="hl std">,</span> <span class="hl kwc">header</span><span class="hl std">=</span><span class="hl num">TRUE</span><span class="hl std">)</span>
+<span class="hl std">week08_code</span> <span class="hl kwb">&lt;-</span> <span class="hl std">all_code</span> <span class="hl opt">%&gt;%</span> <span class="hl kwd">filter</span><span class="hl std">(week</span><span class="hl opt">==</span><span class="hl str">&quot;Week 08&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div></div>
+
+<p>依据vert1_id(发言人身份)，对SKI、MKI、DKI、SKC、MKC、DKC进行分类汇总<br>
+SKI、MKI、DKI是衡量个人层面知识探索的浅、中、深三层级<br>
+SKC、MKC、DKC是衡量班级或小组层面知识构建的浅、中、深三层级<br>
+</p>
+
+<div class="chunk" id="unnamed-chunk-3"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">SKI_sum</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">sqldf</span><span class="hl std">(</span><span class="hl str">&quot;select vert1_id, sum(SKI) as SKI_sum from week08_code group by vert1_id&quot;</span><span class="hl std">)</span>
+<span class="hl std">MKI_sum</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">sqldf</span><span class="hl std">(</span><span class="hl str">&quot;select vert1_id, sum(MKI) as MKI_sum from week08_code group by vert1_id&quot;</span><span class="hl std">)</span>
+<span class="hl std">DKI_sum</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">sqldf</span><span class="hl std">(</span><span class="hl str">&quot;select vert1_id, sum(DKI) as DKI_sum from week08_code group by vert1_id&quot;</span><span class="hl std">)</span>
+<span class="hl std">SKC_sum</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">sqldf</span><span class="hl std">(</span><span class="hl str">&quot;select vert1_id, sum(SKC) as SKC_sum from week08_code group by vert1_id&quot;</span><span class="hl std">)</span>
+<span class="hl std">MKC_sum</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">sqldf</span><span class="hl std">(</span><span class="hl str">&quot;select vert1_id, sum(MKC) as MKC_sum from week08_code group by vert1_id&quot;</span><span class="hl std">)</span>
+<span class="hl std">DKC_sum</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">sqldf</span><span class="hl std">(</span><span class="hl str">&quot;select vert1_id, sum(DKC) as DKC_sum from week08_code group by vert1_id&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div></div>
+
+<p>将汇总结果转换为数字向量，用vert1_id对向量命名，画出柱状图</p>
+<p>SKI</p>
+<div class="chunk" id="unnamed-chunk-4"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">SKI_sum_v</span> <span class="hl kwb">=</span> <span class="hl kwd">as.numeric</span><span class="hl std">(SKI_sum</span><span class="hl opt">$</span><span class="hl std">SKI_sum)</span>
+<span class="hl kwd">names</span><span class="hl std">(SKI_sum_v)</span> <span class="hl kwb">&lt;-</span> <span class="hl std">SKI_sum</span><span class="hl opt">$</span><span class="hl std">vert1_id</span>
+<span class="hl std">SKI_sum_v</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## A B C D E F G H J L M N O P Q R S T 
+## 0 0 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">barplot</span><span class="hl std">(SKI_sum_v,</span> <span class="hl kwc">main</span><span class="hl std">=</span><span class="hl str">&quot;SKI Bar Plot&quot;</span><span class="hl std">,</span> <span class="hl kwc">xlab</span><span class="hl std">=</span><span class="hl str">&quot;Identity&quot;</span><span class="hl std">,</span> <span class="hl kwc">ylab</span><span class="hl std">=</span><span class="hl str">&quot;SKI&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-4-1.png" title="plot of chunk unnamed-chunk-4" alt="plot of chunk unnamed-chunk-4" class="plot" /></div></div>
+
+<p>MKI</p>
+
+<div class="chunk" id="unnamed-chunk-5"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">MKI_sum_v</span> <span class="hl kwb">=</span> <span class="hl kwd">as.numeric</span><span class="hl std">(MKI_sum</span><span class="hl opt">$</span><span class="hl std">MKI_sum)</span>
+<span class="hl kwd">names</span><span class="hl std">(MKI_sum_v)</span> <span class="hl kwb">&lt;-</span> <span class="hl std">MKI_sum</span><span class="hl opt">$</span><span class="hl std">vert1_id</span>
+<span class="hl std">MKI_sum_v</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## A B C D E F G H J L M N O P Q R S T 
+## 1 2 2 2 2 2 3 2 3 0 1 0 2 0 2 3 2 1
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">barplot</span><span class="hl std">(MKI_sum_v,</span> <span class="hl kwc">main</span><span class="hl std">=</span><span class="hl str">&quot;MKI Bar Plot&quot;</span><span class="hl std">,</span> <span class="hl kwc">xlab</span><span class="hl std">=</span><span class="hl str">&quot;Identity&quot;</span><span class="hl std">,</span> <span class="hl kwc">ylab</span><span class="hl std">=</span><span class="hl str">&quot;MKI&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-5-1.png" title="plot of chunk unnamed-chunk-5" alt="plot of chunk unnamed-chunk-5" class="plot" /></div></div>
+
+<p>DKI</p>
+
+<div class="chunk" id="unnamed-chunk-6"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">DKI_sum_v</span> <span class="hl kwb">=</span> <span class="hl kwd">as.numeric</span><span class="hl std">(DKI_sum</span><span class="hl opt">$</span><span class="hl std">DKI_sum)</span>
+<span class="hl kwd">names</span><span class="hl std">(DKI_sum_v)</span> <span class="hl kwb">&lt;-</span> <span class="hl std">DKI_sum</span><span class="hl opt">$</span><span class="hl std">vert1_id</span>
+<span class="hl std">DKI_sum_v</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## A B C D E F G H J L M N O P Q R S T 
+## 3 3 2 2 3 3 2 3 2 0 4 0 3 0 2 2 2 4
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">barplot</span><span class="hl std">(DKI_sum_v,</span> <span class="hl kwc">main</span><span class="hl std">=</span><span class="hl str">&quot;DKI Bar Plot&quot;</span><span class="hl std">,</span> <span class="hl kwc">xlab</span><span class="hl std">=</span><span class="hl str">&quot;Identity&quot;</span><span class="hl std">,</span> <span class="hl kwc">ylab</span><span class="hl std">=</span><span class="hl str">&quot;DKI&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-6-1.png" title="plot of chunk unnamed-chunk-6" alt="plot of chunk unnamed-chunk-6" class="plot" /></div></div>
+
+<p>SKC</p>
+
+<div class="chunk" id="unnamed-chunk-7"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">SKC_sum_v</span> <span class="hl kwb">=</span> <span class="hl kwd">as.numeric</span><span class="hl std">(SKC_sum</span><span class="hl opt">$</span><span class="hl std">SKC_sum)</span>
+<span class="hl kwd">names</span><span class="hl std">(SKC_sum_v)</span> <span class="hl kwb">&lt;-</span> <span class="hl std">SKC_sum</span><span class="hl opt">$</span><span class="hl std">vert1_id</span>
+<span class="hl std">SKC_sum_v</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## A B C D E F G H J L M N O P Q R S T 
+## 0 0 2 0 3 1 3 0 0 1 2 2 2 1 0 2 0 2
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">barplot</span><span class="hl std">(SKC_sum_v,</span> <span class="hl kwc">main</span><span class="hl std">=</span><span class="hl str">&quot;SKC Bar Plot&quot;</span><span class="hl std">,</span> <span class="hl kwc">xlab</span><span class="hl std">=</span><span class="hl str">&quot;Identity&quot;</span><span class="hl std">,</span> <span class="hl kwc">ylab</span><span class="hl std">=</span><span class="hl str">&quot;SKC&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-7-1.png" title="plot of chunk unnamed-chunk-7" alt="plot of chunk unnamed-chunk-7" class="plot" /></div></div>
+
+<p>MKC</p>
+
+<div class="chunk" id="unnamed-chunk-8"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">MKC_sum_v</span> <span class="hl kwb">=</span> <span class="hl kwd">as.numeric</span><span class="hl std">(MKC_sum</span><span class="hl opt">$</span><span class="hl std">MKC_sum)</span>
+<span class="hl kwd">names</span><span class="hl std">(MKC_sum_v)</span> <span class="hl kwb">&lt;-</span> <span class="hl std">MKC_sum</span><span class="hl opt">$</span><span class="hl std">vert1_id</span>
+<span class="hl std">MKC_sum_v</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## A B C D E F G H J L M N O P Q R S T 
+## 2 4 1 0 1 3 3 2 2 0 8 3 2 0 2 4 3 3
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">barplot</span><span class="hl std">(MKC_sum_v,</span> <span class="hl kwc">main</span><span class="hl std">=</span><span class="hl str">&quot;MKC Bar Plot&quot;</span><span class="hl std">,</span> <span class="hl kwc">xlab</span><span class="hl std">=</span><span class="hl str">&quot;Identity&quot;</span><span class="hl std">,</span> <span class="hl kwc">ylab</span><span class="hl std">=</span><span class="hl str">&quot;MKC&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-8-1.png" title="plot of chunk unnamed-chunk-8" alt="plot of chunk unnamed-chunk-8" class="plot" /></div></div>
+
+<p>DKC</p>
+
+<div class="chunk" id="unnamed-chunk-9"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">DKC_sum_v</span> <span class="hl kwb">=</span> <span class="hl kwd">as.numeric</span><span class="hl std">(DKC_sum</span><span class="hl opt">$</span><span class="hl std">DKC_sum)</span>
+<span class="hl kwd">names</span><span class="hl std">(DKC_sum_v)</span> <span class="hl kwb">&lt;-</span> <span class="hl std">DKC_sum</span><span class="hl opt">$</span><span class="hl std">vert1_id</span>
+<span class="hl std">DKC_sum_v</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## A B C D E F G H J L M N O P Q R S T 
+## 0 0 0 0 0 1 1 2 0 0 2 0 1 0 1 0 0 3
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">barplot</span><span class="hl std">(DKC_sum_v,</span> <span class="hl kwc">main</span><span class="hl std">=</span><span class="hl str">&quot;DKC Bar Plot&quot;</span><span class="hl std">,</span> <span class="hl kwc">xlab</span><span class="hl std">=</span><span class="hl str">&quot;Identity&quot;</span><span class="hl std">,</span> <span class="hl kwc">ylab</span><span class="hl std">=</span><span class="hl str">&quot;DKC&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-9-1.png" title="plot of chunk unnamed-chunk-9" alt="plot of chunk unnamed-chunk-9" class="plot" /></div></div>
+
+<p>自定义分析指标<br>
+Sum_I = SKI*1+MKI*2+DKI*3<br>
+Sum_C = SKC*1+MKC*2+DKC*3<br>
+Sum_I个人层面知识探索能力指标<br>
+Sum_C小组层面知识建构能力指标<br>
+分类汇总
+</p>
+<div class="chunk" id="unnamed-chunk-10"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">fsi_code</span> <span class="hl kwb">&lt;-</span> <span class="hl std">all_code</span> <span class="hl opt">%&gt;%</span> <span class="hl kwd">filter</span><span class="hl std">(week</span><span class="hl opt">==</span><span class="hl str">&quot;Week 08&quot;</span><span class="hl std">)</span>  <span class="hl opt">%&gt;%</span>
+  <span class="hl kwd">select</span><span class="hl std">(vert1_id,vert2_id, SKI, MKI, DKI)</span> <span class="hl opt">%&gt;%</span> <span class="hl kwd">mutate</span><span class="hl std">(</span><span class="hl kwc">si_codes</span> <span class="hl std">= SKI</span><span class="hl opt">*</span><span class="hl num">1</span><span class="hl opt">+</span><span class="hl std">MKI</span><span class="hl opt">*</span><span class="hl num">2</span><span class="hl opt">+</span><span class="hl std">DKI</span><span class="hl opt">*</span><span class="hl num">3</span><span class="hl std">)</span><span class="hl opt">%&gt;%</span>
+  <span class="hl kwd">group_by</span><span class="hl std">(vert1_id)</span><span class="hl opt">%&gt;%</span> <span class="hl kwd">summarise</span><span class="hl std">(</span><span class="hl kwc">si_codes</span><span class="hl std">=</span><span class="hl kwd">sum</span><span class="hl std">(si_codes))</span>
+
+<span class="hl std">fsc_code</span> <span class="hl kwb">&lt;-</span> <span class="hl std">all_code</span> <span class="hl opt">%&gt;%</span> <span class="hl kwd">filter</span><span class="hl std">(week</span><span class="hl opt">==</span><span class="hl str">&quot;Week 08&quot;</span><span class="hl std">)</span>  <span class="hl opt">%&gt;%</span>
+  <span class="hl kwd">select</span><span class="hl std">(vert1_id,vert2_id, SKC, MKC, DKC)</span> <span class="hl opt">%&gt;%</span> <span class="hl kwd">mutate</span><span class="hl std">(</span><span class="hl kwc">sc_codes</span> <span class="hl std">= SKC</span><span class="hl opt">*</span><span class="hl num">1</span><span class="hl opt">+</span><span class="hl std">MKC</span><span class="hl opt">*</span><span class="hl num">2</span><span class="hl opt">+</span><span class="hl std">DKC</span><span class="hl opt">*</span><span class="hl num">3</span><span class="hl std">)</span><span class="hl opt">%&gt;%</span>
+  <span class="hl kwd">group_by</span><span class="hl std">(vert1_id)</span><span class="hl opt">%&gt;%</span> <span class="hl kwd">summarise</span><span class="hl std">(</span><span class="hl kwc">sc_codes</span><span class="hl std">=</span><span class="hl kwd">sum</span><span class="hl std">(sc_codes))</span>
+</pre></div>
+</div></div>
+<p>Sum_I柱状图</p>
+<div class="chunk" id="unnamed-chunk-11"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">si_codes_v</span> <span class="hl kwb">=</span> <span class="hl kwd">as.numeric</span><span class="hl std">(fsi_code</span><span class="hl opt">$</span><span class="hl std">si_codes)</span>
+<span class="hl kwd">names</span><span class="hl std">(si_codes_v)</span> <span class="hl kwb">&lt;-</span> <span class="hl std">fsi_code</span><span class="hl opt">$</span><span class="hl std">vert1_id</span>
+<span class="hl std">si_codes_v</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##  A  B  C  D  E  F  G  H  J  L  M  N  O  P  Q  R  S  T 
+## 11 13 11 10 13 13 13 13 12  0 14  0 13  0 10 12 10 14
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">barplot</span><span class="hl std">(si_codes_v,</span> <span class="hl kwc">main</span><span class="hl std">=</span><span class="hl str">&quot;Sum_I Bar Plot&quot;</span><span class="hl std">,</span> <span class="hl kwc">xlab</span><span class="hl std">=</span><span class="hl str">&quot;Identity&quot;</span><span class="hl std">,</span> <span class="hl kwc">ylab</span><span class="hl std">=</span><span class="hl str">&quot;Sum_I&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-11-1.png" title="plot of chunk unnamed-chunk-11" alt="plot of chunk unnamed-chunk-11" class="plot" /></div></div>
+<p>Sum_I描述性统计分析<p>
+<div class="chunk" id="unnamed-chunk-12"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">stat.desc</span><span class="hl std">(fsi_code</span><span class="hl opt">$</span><span class="hl std">si_codes,</span> <span class="hl kwc">basic</span><span class="hl std">=</span><span class="hl num">TRUE</span><span class="hl std">,</span> <span class="hl kwc">desc</span><span class="hl std">=</span><span class="hl num">TRUE</span><span class="hl std">,</span> <span class="hl kwc">norm</span><span class="hl std">=</span><span class="hl num">FALSE</span><span class="hl std">,</span> <span class="hl kwc">p</span><span class="hl std">=</span><span class="hl num">0.95</span><span class="hl std">)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##      nbr.val     nbr.null       nbr.na          min          max 
+##   18.0000000    3.0000000    0.0000000    0.0000000   14.0000000 
+##        range          sum       median         mean      SE.mean 
+##   14.0000000  182.0000000   12.0000000   10.1111111    1.1372737 
+## CI.mean.0.95          var      std.dev     coef.var 
+##    2.3994377   23.2810458    4.8250436    0.4772021
+</pre></div>
+</div></div>
+<p>Sum_C柱状图</p>
+<div class="chunk" id="unnamed-chunk-13"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">sc_codes_v</span> <span class="hl kwb">=</span> <span class="hl kwd">as.numeric</span><span class="hl std">(fsc_code</span><span class="hl opt">$</span><span class="hl std">sc_codes)</span>
+<span class="hl kwd">names</span><span class="hl std">(sc_codes_v)</span> <span class="hl kwb">&lt;-</span> <span class="hl std">fsc_code</span><span class="hl opt">$</span><span class="hl std">vert1_id</span>
+<span class="hl std">sc_codes_v</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##  A  B  C  D  E  F  G  H  J  L  M  N  O  P  Q  R  S  T 
+##  4  8  4  0  5 10 12 10  4  1 24  8  9  1  7 10  6 17
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">barplot</span><span class="hl std">(sc_codes_v,</span> <span class="hl kwc">main</span><span class="hl std">=</span><span class="hl str">&quot;Sum_C Bar Plot&quot;</span><span class="hl std">,</span> <span class="hl kwc">xlab</span><span class="hl std">=</span><span class="hl str">&quot;Identity&quot;</span><span class="hl std">,</span> <span class="hl kwc">ylab</span><span class="hl std">=</span><span class="hl str">&quot;Sum_C&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-13-1.png" title="plot of chunk unnamed-chunk-13" alt="plot of chunk unnamed-chunk-13" class="plot" /></div></div>
+<p>Sum_C描述性统计分析<p>
+<div class="chunk" id="unnamed-chunk-14"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">stat.desc</span><span class="hl std">(fsc_code</span><span class="hl opt">$</span><span class="hl std">sc_codes,</span> <span class="hl kwc">basic</span><span class="hl std">=</span><span class="hl num">TRUE</span><span class="hl std">,</span> <span class="hl kwc">desc</span><span class="hl std">=</span><span class="hl num">TRUE</span><span class="hl std">,</span> <span class="hl kwc">norm</span><span class="hl std">=</span><span class="hl num">FALSE</span><span class="hl std">,</span> <span class="hl kwc">p</span><span class="hl std">=</span><span class="hl num">0.95</span><span class="hl std">)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##      nbr.val     nbr.null       nbr.na          min          max 
+##   18.0000000    1.0000000    0.0000000    0.0000000   24.0000000 
+##        range          sum       median         mean      SE.mean 
+##   24.0000000  140.0000000    7.5000000    7.7777778    1.3875157 
+## CI.mean.0.95          var      std.dev     coef.var 
+##    2.9274022   34.6535948    5.8867304    0.7568653
+</pre></div>
+</div></div>
+<p>Sum_I与Sum_C对比分析<p>
+<div class="chunk" id="unnamed-chunk-15"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">plot</span><span class="hl std">(fsi_code</span><span class="hl opt">$</span><span class="hl std">si_codes,</span><span class="hl kwc">col</span><span class="hl std">=</span><span class="hl str">&quot;red&quot;</span><span class="hl std">,</span><span class="hl kwc">pch</span><span class="hl std">=</span><span class="hl num">1</span><span class="hl std">,</span><span class="hl kwc">type</span><span class="hl std">=</span><span class="hl str">&quot;b&quot;</span><span class="hl std">,</span><span class="hl kwc">xlab</span><span class="hl std">=</span><span class="hl str">&quot;STUDENT&quot;</span><span class="hl std">,</span><span class="hl kwc">ylab</span><span class="hl std">=</span><span class="hl str">&quot;&quot;</span><span class="hl std">,</span><span class="hl kwc">cex</span><span class="hl std">=</span><span class="hl num">1.2</span><span class="hl std">,</span><span class="hl kwc">lwd</span><span class="hl std">=</span><span class="hl num">2</span><span class="hl std">,</span><span class="hl kwc">ylim</span><span class="hl std">=</span><span class="hl kwd">c</span><span class="hl std">(</span><span class="hl num">0</span><span class="hl std">,</span><span class="hl num">30</span><span class="hl std">))</span>
+<span class="hl kwd">lines</span><span class="hl std">(fsc_code</span><span class="hl opt">$</span><span class="hl std">sc_codes,</span><span class="hl kwc">col</span><span class="hl std">=</span><span class="hl str">&quot;blue&quot;</span><span class="hl std">,</span><span class="hl kwc">pch</span><span class="hl std">=</span><span class="hl num">6</span><span class="hl std">,</span><span class="hl kwc">type</span><span class="hl std">=</span><span class="hl str">&quot;b&quot;</span><span class="hl std">,</span><span class="hl kwc">xlab</span><span class="hl std">=</span><span class="hl str">&quot;STUDENT&quot;</span><span class="hl std">,</span><span class="hl kwc">ylab</span><span class="hl std">=</span><span class="hl str">&quot;&quot;</span><span class="hl std">,</span><span class="hl kwc">cex</span><span class="hl std">=</span><span class="hl num">1.2</span><span class="hl std">,</span><span class="hl kwc">lwd</span><span class="hl std">=</span><span class="hl num">2</span><span class="hl std">)</span>
+<span class="hl kwd">grid</span><span class="hl std">(</span><span class="hl kwc">nx</span><span class="hl std">=</span><span class="hl num">6</span><span class="hl std">,</span><span class="hl kwc">ny</span><span class="hl std">=</span><span class="hl num">6</span><span class="hl std">,</span><span class="hl kwc">lwd</span><span class="hl std">=</span><span class="hl num">2</span><span class="hl std">)</span>
+<span class="hl kwd">legend</span><span class="hl std">(</span><span class="hl str">&quot;topright&quot;</span><span class="hl std">,</span><span class="hl kwc">legend</span><span class="hl std">=</span><span class="hl kwd">c</span><span class="hl std">(</span><span class="hl str">&quot;Sum_I&quot;</span><span class="hl std">,</span><span class="hl str">&quot;Sum_C&quot;</span><span class="hl std">),</span><span class="hl kwc">pch</span><span class="hl std">=</span><span class="hl kwd">c</span><span class="hl std">(</span><span class="hl num">1</span><span class="hl std">,</span><span class="hl num">6</span><span class="hl std">),</span><span class="hl kwc">col</span><span class="hl std">=</span><span class="hl kwd">c</span><span class="hl std">(</span><span class="hl str">&quot;red&quot;</span><span class="hl std">,</span><span class="hl str">&quot;blue&quot;</span><span class="hl std">),</span><span class="hl kwc">lwd</span><span class="hl std">=</span><span class="hl num">2</span><span class="hl std">,</span> <span class="hl kwc">cex</span><span class="hl std">=</span><span class="hl kwd">c</span><span class="hl std">(</span><span class="hl num">1.4</span><span class="hl std">,</span><span class="hl num">1.4</span><span class="hl std">))</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-15-1.png" title="plot of chunk unnamed-chunk-15" alt="plot of chunk unnamed-chunk-15" class="plot" /></div></div>
+
+<p>
+nbr.val         样本数量 nbr.null 空样本数量 nbr.na  数值缺失样本数量<br>
+min     最小值   max      最大值     range   范围          sum    求和<br>
+median  中位数   mean     平均数     SE.mean 标准误差      CI.mean置信区间<br>
+var     方差     std.dev  标准差     coef.var变异系数<br>
+</p>
+</body>
+</html>

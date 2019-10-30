@@ -1,0 +1,206 @@
+<html>
+
+<head>
+<style type="text/css">
+.inline {
+  background-color: #f7f7f7;
+  border:solid 1px #B0B0B0;
+}
+.error {
+	font-weight: bold;
+	color: #FF0000;
+}
+.warning {
+	font-weight: bold;
+}
+.message {
+	font-style: italic;
+}
+.source, .output, .warning, .error, .message {
+	padding: 0 1em;
+  border:solid 1px #F7F7F7;
+}
+.source {
+  background-color: #f5f5f5;
+}
+.left {
+  text-align: left;
+}
+.right {
+  text-align: right;
+}
+.center {
+  text-align: center;
+}
+.hl.num {
+  color: #AF0F91;
+}
+.hl.str {
+  color: #317ECC;
+}
+.hl.com {
+  color: #AD95AF;
+  font-style: italic;
+}
+.hl.opt {
+  color: #000000;
+}
+.hl.std {
+  color: #585858;
+}
+.hl.kwa {
+  color: #295F94;
+  font-weight: bold;
+}
+.hl.kwb {
+  color: #B05A65;
+}
+.hl.kwc {
+  color: #55aa55;
+}
+.hl.kwd {
+  color: #BC5A65;
+  font-weight: bold;
+}
+</style>
+<title>week02_sa</title>
+</head>
+
+<body>
+
+<p>引入devtools、LagSeq、dplyr包</p>
+
+<div class="chunk" id="unnamed-chunk-1"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(devtools)</span>
+</pre></div>
+<div class="message"><pre class="knitr r">## Loading required package: usethis
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(LagSeq)</span>
+<span class="hl kwd">library</span><span class="hl std">(dplyr)</span>
+</pre></div>
+<div class="message"><pre class="knitr r">## 
+## Attaching package: 'dplyr'
+</pre></div>
+<div class="message"><pre class="knitr r">## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+</pre></div>
+<div class="message"><pre class="knitr r">## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+</pre></div>
+</div></div>
+
+<p>读取数据表<br>
+筛选Week 02部分，选取participatory_role一列，存入week02_code，每行代表该角色向vert2回复，数据表本身已按事件发生先后排序</p>
+
+<div class="chunk" id="unnamed-chunk-2"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">all_code</span><span class="hl kwb">=</span><span class="hl kwd">read.csv</span><span class="hl std">(</span><span class="hl str">&quot;all_code.csv&quot;</span><span class="hl std">,</span> <span class="hl kwc">header</span><span class="hl std">=</span><span class="hl num">TRUE</span><span class="hl std">)</span>
+<span class="hl std">week02_code</span> <span class="hl kwb">&lt;-</span> <span class="hl std">all_code</span> <span class="hl opt">%&gt;%</span> <span class="hl kwd">filter</span><span class="hl std">(week</span><span class="hl opt">==</span><span class="hl str">&quot;Week 02&quot;</span><span class="hl std">)</span> <span class="hl opt">%&gt;%</span> <span class="hl kwd">select</span><span class="hl std">(participatory_role)</span>
+</pre></div>
+</div></div>
+
+<p>将participatory_role转化为字符串向量role_v<br>
+取出role_v中不重复元素
+</p>
+
+<div class="chunk" id="unnamed-chunk-3"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">role_v</span><span class="hl kwb">&lt;-</span><span class="hl kwd">as.vector</span><span class="hl std">(week02_code</span><span class="hl opt">$</span><span class="hl std">participatory_role)</span>
+<span class="hl kwd">as.character</span><span class="hl std">(</span><span class="hl kwd">unique</span><span class="hl std">(role_v))</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## [1] &quot;Influencer&quot; &quot;Leader&quot;     &quot;Starter&quot;    &quot;Peripheral&quot; &quot;Mediator&quot;  
+## [6] &quot;Regular&quot;
+</pre></div>
+</div></div>
+
+<p>用数字1-6对6类角色进行编码</p>
+
+<div class="chunk" id="unnamed-chunk-4"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">role_case</span><span class="hl kwb">&lt;-</span> <span class="hl kwd">case_when</span><span class="hl std">(role_v</span> <span class="hl opt">==</span> <span class="hl str">&quot;Starter&quot;</span> <span class="hl opt">~</span> <span class="hl num">1</span><span class="hl std">,</span>
+                   <span class="hl std">role_v</span> <span class="hl opt">==</span> <span class="hl str">&quot;Leader&quot;</span> <span class="hl opt">~</span> <span class="hl num">2</span><span class="hl std">,</span>
+                   <span class="hl std">role_v</span> <span class="hl opt">==</span> <span class="hl str">&quot;Influencer&quot;</span> <span class="hl opt">~</span> <span class="hl num">3</span><span class="hl std">,</span>
+                   <span class="hl std">role_v</span> <span class="hl opt">==</span> <span class="hl str">&quot;Peripheral&quot;</span> <span class="hl opt">~</span> <span class="hl num">4</span><span class="hl std">,</span>
+                   <span class="hl std">role_v</span> <span class="hl opt">==</span> <span class="hl str">&quot;Mediator&quot;</span> <span class="hl opt">~</span> <span class="hl num">5</span><span class="hl std">,</span>
+                   <span class="hl std">role_v</span> <span class="hl opt">==</span> <span class="hl str">&quot;Regular&quot;</span> <span class="hl opt">~</span> <span class="hl num">6</span><span class="hl std">)</span>
+</pre></div>
+</div></div>
+
+<p>使用LagSeq(滞后序列分析包)计算出过渡频率，Yule q值和z值<br>
+过渡频率$freq，表示一类角色回复之后紧跟另一类角色的频率
+</p>
+
+<div class="chunk" id="unnamed-chunk-5"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">as.matrix</span><span class="hl std">(</span><span class="hl kwd">LagSeq</span><span class="hl std">(role_case)</span><span class="hl opt">$</span><span class="hl std">freq)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##      [,1] [,2] [,3] [,4] [,5] [,6]
+## [1,]    9    5    3    3    1    4
+## [2,]    3    4    4    1    3    1
+## [3,]    9    4    0    0    0    1
+## [4,]    0    1    2    0    1    1
+## [5,]    1    1    3    1    2    1
+## [6,]    3    1    1    1    2    2
+</pre></div>
+</div></div>
+
+<p>Yule q 值，即标准化度量，表示两个编码类别之间的关联强度，范围从-1到+1, 0表示没有关联</p>
+
+<div class="chunk" id="unnamed-chunk-6"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">as.matrix</span><span class="hl std">(</span><span class="hl kwd">LagSeq</span><span class="hl std">(role_case)</span><span class="hl opt">$</span><span class="hl std">yulesq)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##            [,1]         [,2]       [,3]         [,4]       [,5]
+## [1,]  0.1438127 -0.011494253 -0.3045822  0.560000000 -0.6134454
+## [2,] -0.3985330  0.172413793  0.2771084 -0.008403361  0.3734940
+## [3,]  0.6928983  0.277108434 -1.0000000 -1.000000000 -1.0000000
+## [4,] -1.0000000 -0.008403361  0.5500000 -1.000000000  0.3469388
+## [5,] -0.6134454 -0.371428571  0.4567901  0.346938776  0.4400000
+## [6,] -0.0440678 -0.428571429 -0.3526012  0.287128713  0.3777778
+##             [,6]
+## [1,]  0.20754717
+## [2,] -0.42857143
+## [3,] -0.35260116
+## [4,]  0.28712871
+## [5,] -0.08270677
+## [6,]  0.31182796
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl std">yulesq</span><span class="hl kwb">=</span><span class="hl kwd">as.matrix</span><span class="hl std">(</span><span class="hl kwd">LagSeq</span><span class="hl std">(role_case)</span><span class="hl opt">$</span><span class="hl std">yulesq)</span>
+<span class="hl std">yulesq[yulesq</span><span class="hl opt">&lt;</span><span class="hl num">0</span><span class="hl std">]</span><span class="hl kwb">&lt;-</span><span class="hl num">0</span>
+<span class="hl kwd">as.matrix</span><span class="hl std">(yulesq)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##           [,1]      [,2]      [,3]      [,4]      [,5]      [,6]
+## [1,] 0.1438127 0.0000000 0.0000000 0.5600000 0.0000000 0.2075472
+## [2,] 0.0000000 0.1724138 0.2771084 0.0000000 0.3734940 0.0000000
+## [3,] 0.6928983 0.2771084 0.0000000 0.0000000 0.0000000 0.0000000
+## [4,] 0.0000000 0.0000000 0.5500000 0.0000000 0.3469388 0.2871287
+## [5,] 0.0000000 0.0000000 0.4567901 0.3469388 0.4400000 0.0000000
+## [6,] 0.0000000 0.0000000 0.0000000 0.2871287 0.3777778 0.3118280
+</pre></div>
+</div></div>
+
+<p>z值表示特定过渡的统计显著性(z值大于1.96表示过渡序列达到了统计显著性即p < .05)</p>
+
+<div class="chunk" id="unnamed-chunk-7"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">as.matrix</span><span class="hl std">(</span><span class="hl kwd">LagSeq</span><span class="hl std">(role_case)</span><span class="hl opt">$</span><span class="hl std">adjres)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##            [,1]        [,2]       [,3]       [,4]       [,5]       [,6]
+## [1,]  0.5662109 -0.03809662 -0.9061590  1.4085226 -1.4071139  0.6078075
+## [2,] -1.2419497  0.52905919  0.8537887 -0.0145540  1.0372799 -0.8632642
+## [3,]  2.8948973  0.85378872 -1.9143803 -1.0722351 -1.4790850 -0.6842237
+## [4,] -1.5720118 -0.01455400  1.3479527 -0.6005537  0.6259236  0.5101362
+## [5,] -1.4071139 -0.72498056  1.3030034  0.6259236  1.0863349 -0.1482898
+## [6,] -0.1197197 -0.86326424 -0.6842237  0.5101362  0.9167009  0.7471236
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl std">adjres</span><span class="hl kwb">=</span><span class="hl kwd">as.matrix</span><span class="hl std">(</span><span class="hl kwd">LagSeq</span><span class="hl std">(role_case)</span><span class="hl opt">$</span><span class="hl std">adjres)</span>  <span class="hl com">#z 值</span>
+<span class="hl std">adjres[adjres</span><span class="hl opt">&lt;</span><span class="hl num">1.96</span><span class="hl std">]</span><span class="hl kwb">&lt;-</span><span class="hl num">0</span>
+<span class="hl kwd">as.matrix</span><span class="hl std">(adjres)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##          [,1] [,2] [,3] [,4] [,5] [,6]
+## [1,] 0.000000    0    0    0    0    0
+## [2,] 0.000000    0    0    0    0    0
+## [3,] 2.894897    0    0    0    0    0
+## [4,] 0.000000    0    0    0    0    0
+## [5,] 0.000000    0    0    0    0    0
+## [6,] 0.000000    0    0    0    0    0
+</pre></div>
+</div></div>
+
+
+
+<div class="chunk" id="unnamed-chunk-8"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">plot</span><span class="hl std">(cars)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-8-1.png" title="plot of chunk unnamed-chunk-8" alt="plot of chunk unnamed-chunk-8" class="plot" /></div></div>
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+from,to,value,label,font.size
+11,29,0.1,[a video],0.5
+12,28,0.1,great piont,0.5
+13,19,0.1,disagree,0.5
+21,29,0.1,disagree,0.5
+21,2,0.1,agree with you,0.5
+21,3,0.1,support,0.5
+21,4,0.1,social,0.5
+28,11,0.1,social,0.5
+29,8,0.1,support,0.5
+1,21,0.1,social,0.5
+3,20,0.1,emotion,0.5
+5,16,0.2,agree ,0.5
+12,17,0.2,[a picture],0.5
+13,21,0.2,[a picture],0.5
+16,22,0.2,[a video],0.5
+18,13,0.2,social,0.5
+22,14,0.2,disagree,0.5
+21,15,0.1,emotion,0.5
+23,2,0.1,disagree,0.5
+27,3,0.1,agree ,0.5
+28,4,0.3,[a picture],0.5
+27,6,0.3,[a link],0.5
+9,6,0.3,[a picture],0.5
+10,7,0.4,[a link],0.5
+11,8,0.5,agree ,0.5
+27,10,0.6,[a link],0.5
+16,9,0.7,disagree,0.5
+15,22,0.6,[a link],0.5
+24,21,0.6,disagree,0.5
+23,17,0.4,agree ,0.5
+28,18,0.5,[a picture],0.5
